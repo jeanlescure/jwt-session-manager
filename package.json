@@ -1,0 +1,58 @@
+{
+  "name": "jwt-session-manager",
+  "version": "0.0.1",
+  "description": "Server and client functions for handling sessions using JWT",
+  "keywords": [
+    "jwt",
+    "json",
+    "json web token",
+    "session",
+    "session manager",
+    "server jwt",
+    "client jwt",
+    "browser jwt",
+    "server session management",
+    "client session management",
+    "browser session management"
+  ],
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "scripts": {
+    "gen:version": "echo \"export default '`jq -r .version package.json`';\" > ./src/version.ts",
+    "predev": "yarn gen:version",
+    "dev": "rollup -c rollup.config.ts -w",
+    "pretest": "yarn gen:version",
+    "test": "jest",
+    "lint": "tslint ./src/*.ts",
+    "prebuild": "yarn gen:version && rimraf dist",
+    "build": "tsc --module es6 && rollup -c rollup.config.ts",
+    "prestart": "yarn gen:version",
+    "start": "node -r dotenv/config dist/index.js"
+  },
+  "devDependencies": {
+    "@rollup/plugin-run": "^2.0.2",
+    "@types/jest": "^26.0.4",
+    "@types/node": "^14.0.22",
+    "cross-env": "^7.0.2",
+    "jest": "^26.1.0",
+    "jest-config": "^26.1.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.21.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-prettier": "^2.1.0",
+    "rollup-plugin-typescript2": "^0.27.1",
+    "ts-jest": "^26.1.1",
+    "ts-node": "^8.10.2",
+    "tslint": "^6.1.1",
+    "tslint-config-airbnb-base": "^0.3.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  }
+}
