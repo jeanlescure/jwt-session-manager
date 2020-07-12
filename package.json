@@ -52,5 +52,7 @@
     "tslint-config-airbnb-base": "^0.3.0",
     "typescript": "^3.8.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "short-unique-id": "^3.0.3"
+  }
 }
