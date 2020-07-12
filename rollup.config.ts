@@ -28,7 +28,7 @@ export default [
         preferBuiltins: true,
       }),
       dev && run({
-        execArgv: ['-r', 'dotenv/config', '-r', 'source-map-support/register', '--inspect'],
+        execArgv: ['-r', 'source-map-support/register', '--inspect'],
       }),
     ],
     // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
