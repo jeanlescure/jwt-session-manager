@@ -67,7 +67,7 @@ test('can request a session', async () => {
 
   expect(decodedRequestToken.data).toBe('foobar');
 
-  const decodedSessionToken: {data: string} = jwt.verify(clientSessionManager.state.sessionToken, 'secret') as {
+  const decodedSessionToken: {data: string} = jwt.verify(clientSessionManager.sessionToken, 'secret') as {
     data: string;
   };
 

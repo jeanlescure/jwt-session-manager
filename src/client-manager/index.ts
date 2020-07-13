@@ -3,6 +3,7 @@ import {
 } from './interfaces';
 
 export default class ClientJWTSessionManager {
+  sessionToken:string = '';
   state: ClientState = {};
 
   clientOptions: ClientInitOptions = {
@@ -66,11 +67,9 @@ export default class ClientJWTSessionManager {
 
     const sessionToken = await getSessionHandler(this.state.sessionRequestToken);
 
-    setState({
-      sessionToken,
-    });
+    this.sessionToken = sessionToken;
 
     storeSessionTokenHandler
-    && storeSessionTokenHandler(this.state.sessionToken);
+    && storeSessionTokenHandler(this.sessionToken);
   }
 };
