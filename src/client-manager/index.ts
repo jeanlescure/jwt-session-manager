@@ -3,8 +3,9 @@ import {
 } from './interfaces';
 
 export default class ClientJWTSessionManager {
-  sessionToken:string = '';
-  state: ClientState = {};
+  state: ClientState = {
+    sessionToken: null,
+  };
 
   clientOptions: ClientInitOptions = {
     getSessionRequestTokenHandler: async () => '',
@@ -48,8 +49,12 @@ export default class ClientJWTSessionManager {
     });
 
     storeSessionRequestTokenHandler
-    && storeSessionRequestTokenHandler(this.state.sessionRequestToken);
-  }
+    && await storeSessionRequestTokenHandler(this.state.sessionRequestToken);
+  };
+
+  get sessionToken(): string {
+    return this.state.sessionToken;
+  };
 
   getSession = async () => {
     const {
@@ -63,13 +68,44 @@ export default class ClientJWTSessionManager {
       storeSessionTokenHandler,
     } = clientOptions;
 
-    await getSessionRequestToken();
+    if (!this.state.sessionRequestToken) {
+      await getSessionRequestToken();
+    }
 
-    const sessionToken = await getSessionHandler(this.state.sessionRequestToken);
+    const sessionToken = await getSessionHandler(this.state.sessionRequestToken).catch(async (error) => {
+      if (error.name !== 'TokenExpiredError') {
+        throw error;
+      }
 
-    this.sessionToken = sessionToken;
+      // If token is expired simply retry once as it may be an invalid stored token
+      await getSessionRequestToken();
+
+      return await getSessionHandler(this.state.sessionRequestToken);
+    });
+
+    setState({
+      sessionToken
+    });
 
     storeSessionTokenHandler
-    && storeSessionTokenHandler(this.sessionToken);
-  }
+    && await storeSessionTokenHandler(this.sessionToken);
+  };
+
+  closeSession = async () => {
+    const {
+      clientOptions,
+      setState,
+    } = this;
+
+    const {
+      closeSessionHandler,
+    } = clientOptions;
+
+    closeSessionHandler
+    && await closeSessionHandler(this.sessionToken);
+
+    setState({
+      sessionToken: null,
+    });
+  };
 };
