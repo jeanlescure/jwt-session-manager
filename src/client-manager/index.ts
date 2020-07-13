@@ -16,29 +16,38 @@ export default class ClientJWTSessionManager {
     };
 
     if (restoreState) {
-      this.state = {
-        ...this.state,
-        ...restoreState,
-      }
+      this.setState(restoreState);
     }
   }
 
-  setState(newState: ClientState) {
+  setState = (newState: ClientState) => {
+    const prevState: ClientState = this.state;
+
     this.state = {
-      ...this.state,
+      ...prevState,
       ...newState,
-    }
+    };
   };
 
   async getSessionRequestToken() {
     const {
+      clientOptions,
+      setState,
+    } = this;
+
+    const {
       getSessionRequestTokenHandler,
-    } = this.clientOptions;
+      storeSessionRequestTokenHandler,
+    } = clientOptions;
 
     const requestTokenResponse = await getSessionRequestTokenHandler();
 
-    this.setState({
+    setState({
       sessionRequestToken: requestTokenResponse,
     });
+
+    if (storeSessionRequestTokenHandler) {
+      storeSessionRequestTokenHandler(this.state.sessionRequestToken);
+    }
   }
 };
