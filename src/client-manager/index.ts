@@ -16,9 +16,8 @@ export default class ClientJWTSessionManager {
       ...options,
     };
 
-    if (restoreState) {
-      this.setState(restoreState);
-    }
+    restoreState
+    && this.setState(restoreState);
   }
 
   setState = (newState: ClientState) => {
@@ -47,9 +46,8 @@ export default class ClientJWTSessionManager {
       sessionRequestToken: requestTokenResponse,
     });
 
-    if (storeSessionRequestTokenHandler) {
-      storeSessionRequestTokenHandler(this.state.sessionRequestToken);
-    }
+    storeSessionRequestTokenHandler
+    && storeSessionRequestTokenHandler(this.state.sessionRequestToken);
   }
 
   requestSession = async () => {
@@ -72,8 +70,7 @@ export default class ClientJWTSessionManager {
       sessionToken,
     });
 
-    if (storeSessionTokenHandler) {
-      storeSessionTokenHandler(this.state.sessionToken);
-    }
+    storeSessionTokenHandler
+    && storeSessionTokenHandler(this.state.sessionToken);
   }
 };
