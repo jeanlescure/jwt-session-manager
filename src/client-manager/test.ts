@@ -13,9 +13,9 @@ test('can ask for session request token', async() => {
     },
   });
 
-  expect(clientSessionManager.sessionRequestToken).toBeUndefined();
+  expect(clientSessionManager.state.sessionRequestToken).toBeUndefined();
 
   await clientSessionManager.getSessionRequestToken();
 
-  jwt.verify(clientSessionManager.sessionRequestToken, 'secret');
+  jwt.verify(clientSessionManager.state.sessionRequestToken, 'secret');
 });

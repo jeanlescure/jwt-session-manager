@@ -1,17 +1,34 @@
-import {ClientInitOptions} from './interfaces';
+import {
+  ClientInitOptions, ClientState
+} from './interfaces';
 
 export default class ClientJWTSessionManager {
-  sessionRequestToken: string;
+  state: ClientState = {};
+
   clientOptions: ClientInitOptions = {
     getSessionRequestTokenHandler: async () => {},
   };
 
-  constructor(options: ClientInitOptions) {
+  constructor(options: ClientInitOptions, restoreState?: ClientState) {
     this.clientOptions = {
       ...this.clientOptions,
       ...options,
     };
+
+    if (restoreState) {
+      this.state = {
+        ...this.state,
+        ...restoreState,
+      }
+    }
   }
+
+  setState(newState: ClientState) {
+    this.state = {
+      ...this.state,
+      ...newState,
+    }
+  };
 
   async getSessionRequestToken() {
     const {
@@ -20,6 +37,8 @@ export default class ClientJWTSessionManager {
 
     const requestTokenResponse = await getSessionRequestTokenHandler();
 
-    this.sessionRequestToken = requestTokenResponse;
+    this.setState({
+      sessionRequestToken: requestTokenResponse,
+    });
   }
 };
