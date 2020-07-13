@@ -1,6 +1,6 @@
 {
   "name": "jwt-session-manager",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Server and client functions for handling sessions using JWT",
   "keywords": [
     "jwt",
@@ -16,25 +16,23 @@
     "browser session management"
   ],
   "license": "Apache-2.0",
-  "main": "dist/index.js",
+  "main": "dist/index",
+  "browser": "dist/index.browser",
+  "typings": "typings/index",
   "repository": {
     "type": "git",
     "url": ""
   },
   "scripts": {
     "gen:version": "echo \"export default '`jq -r .version package.json`';\" > ./src/version.ts",
-    "predev": "yarn gen:version",
-    "dev": "rollup -c rollup.config.ts -w",
+    "gen:typings": "tsc --target es5 --allowSyntheticDefaultImports --declarationDir typings --declaration --emitDeclarationOnly ./src/index.ts",
     "pretest": "yarn gen:version",
     "test": "jest",
     "lint": "tslint ./src/*.ts",
-    "prebuild": "yarn gen:version && rimraf dist",
-    "build": "tsc --module es6 && rollup -c rollup.config.ts",
-    "prestart": "yarn gen:version",
-    "start": "node dist/index.js"
+    "prebuild": "yarn lint && yarn gen:typings && yarn gen:version && rimraf dist",
+    "build": "rollup -c rollup.config.ts"
   },
   "devDependencies": {
-    "@rollup/plugin-run": "^2.0.2",
     "@types/jest": "^26.0.4",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^14.0.22",

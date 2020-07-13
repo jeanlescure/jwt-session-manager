@@ -1,4 +1,6 @@
-import {version} from './';
+import {
+  version,
+} from './';
 
 test('version is exported', () => {
   expect(typeof version).toBe('string');
