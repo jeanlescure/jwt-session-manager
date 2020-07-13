@@ -6,7 +6,8 @@ export default class ClientJWTSessionManager {
   state: ClientState = {};
 
   clientOptions: ClientInitOptions = {
-    getSessionRequestTokenHandler: async () => {},
+    getSessionRequestTokenHandler: async () => '',
+    requestSessionHandler: async () => '',
   };
 
   constructor(options: ClientInitOptions, restoreState?: ClientState) {
@@ -29,7 +30,7 @@ export default class ClientJWTSessionManager {
     };
   };
 
-  async getSessionRequestToken() {
+  getSessionRequestToken = async () => {
     const {
       clientOptions,
       setState,
@@ -49,5 +50,30 @@ export default class ClientJWTSessionManager {
     if (storeSessionRequestTokenHandler) {
       storeSessionRequestTokenHandler(this.state.sessionRequestToken);
     }
+  }
+
+  requestSession = async () => {
+    const {
+      clientOptions,
+      state,
+      getSessionRequestToken,
+      setState,
+    } = this;
+
+    const {
+      requestSessionHandler,
+    } = clientOptions;
+
+    const {
+      sessionRequestToken,
+    } = state;
+
+    await getSessionRequestToken();
+
+    const sessionToken = await requestSessionHandler(sessionRequestToken);
+
+    setState({
+      sessionToken,
+    });
   }
 };

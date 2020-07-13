@@ -1,8 +1,10 @@
 export interface ClientInitOptions {
-  getSessionRequestTokenHandler: Function;
+  getSessionRequestTokenHandler: () => Promise<string>;
+  requestSessionHandler: (sessionRequestToken: string) => Promise<string>;
   storeSessionRequestTokenHandler?: (sessionRequestToken: string) => Promise<void>;
 }
 
 export interface ClientState {
   sessionRequestToken?: string;
+  sessionToken?: string;
 }
