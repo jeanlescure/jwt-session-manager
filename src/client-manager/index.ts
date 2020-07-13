@@ -55,25 +55,25 @@ export default class ClientJWTSessionManager {
   requestSession = async () => {
     const {
       clientOptions,
-      state,
       getSessionRequestToken,
       setState,
     } = this;
 
     const {
       requestSessionHandler,
+      storeSessionTokenHandler,
     } = clientOptions;
-
-    const {
-      sessionRequestToken,
-    } = state;
 
     await getSessionRequestToken();
 
-    const sessionToken = await requestSessionHandler(sessionRequestToken);
+    const sessionToken = await requestSessionHandler(this.state.sessionRequestToken);
 
     setState({
       sessionToken,
     });
+
+    if (storeSessionTokenHandler) {
+      storeSessionTokenHandler(this.state.sessionToken);
+    }
   }
 };
