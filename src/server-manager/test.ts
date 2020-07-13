@@ -2,13 +2,17 @@ import ServerJWTSessionManager from './';
 
 const customSecret = 'muchLessSecureTestSecret';
 
+const mockStore: {
+  [key: string]: any,
+} = {};
+
 test('can load secret from env vars', async () => {
   const serverSessionManager = new ServerJWTSessionManager();
 
   expect(serverSessionManager.secret).toBe('thisIs1TestSecret!whichIncludes$p#c!@|ch@rs');
 });
 
-test('can be instantiated with custom secret', async () => {
+test('can be instantiated with custom secret', () => {
   const serverSessionManager = new ServerJWTSessionManager({
     secret: customSecret,
   });
@@ -48,4 +52,16 @@ test('will throw if instantiated with invalid secret and autoGenerateSecret fals
     secret: null,
     autoGenerateSecret: false,
   })).toThrow('Invalid Secret!');
+});
+
+test('can store secret upon instantiation', async () => {
+  const serverSessionManager = new ServerJWTSessionManager({
+    storeSecretHandler: async (secret: string) => {
+      mockStore.secret = secret;
+    },
+  });
+
+  serverSessionManager.secretStorePromise.then(() => {
+    expect(mockStore.secret).toBe('thisIs1TestSecret!whichIncludes$p#c!@|ch@rs');
+  }); 
 });

@@ -17,6 +17,8 @@ export default class ServerJWTSessionManager {
     autoGenerateSecret: true,
   };
 
+  secretStorePromise: Promise<void>;
+
   get secret(): string {
     return this.serverOptions.secret;
   }
@@ -48,5 +50,8 @@ export default class ServerJWTSessionManager {
     } else if (!this.serverOptions.autoGenerateSecret) {
       throw new Error('Invalid Secret!');
     }
+
+    this.serverOptions.storeSecretHandler
+    && (this.secretStorePromise = this.serverOptions.storeSecretHandler(this.secret));
   }
 };
