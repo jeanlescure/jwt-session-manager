@@ -1,5 +1,5 @@
 import {
-  ClientInitOptions, ClientState
+  ClientOptions, ClientState
 } from './interfaces';
 
 export default class ClientJWTSessionManager {
@@ -7,12 +7,12 @@ export default class ClientJWTSessionManager {
     sessionToken: null,
   };
 
-  clientOptions: ClientInitOptions = {
+  clientOptions: ClientOptions = {
     getSessionRequestTokenHandler: async () => '',
     getSessionHandler: async () => '',
   };
 
-  constructor(options: ClientInitOptions, restoreState?: ClientState) {
+  constructor(options: ClientOptions, restoreState?: ClientState) {
     this.clientOptions = {
       ...this.clientOptions,
       ...options,
