@@ -53,6 +53,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "jsonwebtoken": "^8.5.1",
     "short-unique-id": "^3.0.3"
   }
 }
