@@ -19,7 +19,7 @@ test('can ask for session request token', async () => {
     getSessionRequestTokenHandler: async () => {
       return new Promise((resolve, reject) => resolve(mockRequestToken));
     },
-    requestSessionHandler: async () => '',
+    getSessionHandler: async () => '',
   });
 
   expect(clientSessionManager.state.sessionRequestToken).toBeUndefined();
@@ -34,7 +34,7 @@ test('can ask for session request token and add it to external store', async () 
     getSessionRequestTokenHandler: async () => {
       return new Promise((resolve, reject) => resolve(mockRequestToken));
     },
-    requestSessionHandler: async () => '',
+    getSessionHandler: async () => '',
     storeSessionRequestTokenHandler: async (sessionRequestToken) => {
       return new Promise((resolve, reject) => {
         mockStore.sessionRequestToken = sessionRequestToken;
@@ -55,10 +55,10 @@ test('can request a session', async () => {
     getSessionRequestTokenHandler: async () => {
       return new Promise((resolve, reject) => resolve(mockRequestToken));
     },
-    requestSessionHandler: async () => mockSessionToken,
+    getSessionHandler: async () => mockSessionToken,
   });
 
-  await clientSessionManager.requestSession();
+  await clientSessionManager.getSession();
 
   const decodedRequestToken: {data: string} = jwt.verify(clientSessionManager.state.sessionRequestToken, 'secret') as {
     data: string;
@@ -79,7 +79,7 @@ test('can request a session while using external store', async () => {
     getSessionRequestTokenHandler: async () => {
       return new Promise((resolve, reject) => resolve(mockRequestToken));
     },
-    requestSessionHandler: async (sessionRequestToken: string) => {
+    getSessionHandler: async (sessionRequestToken: string) => {
       const decodedRequestToken: {data: string} = jwt.verify(sessionRequestToken, 'secret') as {
         data: string;
         exp: number;
@@ -103,7 +103,7 @@ test('can request a session while using external store', async () => {
     },
   });
 
-  await clientSessionManager.requestSession();
+  await clientSessionManager.getSession();
 
   const decodedSessionToken: {data: string} = jwt.verify(mockStore.sessionToken, 'secret') as {
     data: string;
