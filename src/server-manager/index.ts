@@ -16,6 +16,9 @@ const uid = new ShortUniqueId({
 export default class ServerJWTSessionManager {
   serverOptions: ServerOptions = {
     autoGenerateSecret: true,
+    validateRequestHandler: async (validationData: any) => false,
+    storeSessionKeyHandler: async (sessionKey: string) => '',
+    validateSessionKeyInStoreHandler: async () => false,
   };
 
   secretStorePromise: Promise<void>;
@@ -35,13 +38,13 @@ export default class ServerJWTSessionManager {
     return uid();
   };
 
-  constructor(options?: ServerOptions) {
+  constructor(options: ServerOptions) {
     const envOptions: ServerOptions = {
+      ...this.serverOptions,
       secret: process.env.SESSION_MANAGER_SECRET,
     };
 
     this.serverOptions = {
-      ...this.serverOptions,
       ...envOptions,
       ...options,
     };
@@ -67,6 +70,46 @@ export default class ServerJWTSessionManager {
       jwt.verify(sessionRequestToken, this.secret);
       return true;
     } catch(e) {
+      return false;
+    }
+  };
+
+  generateSessionToken = (sessionKey: string | null) => {
+    return (
+      !sessionKey && null
+    ) || jwt.sign({
+      data: sessionKey,
+    }, this.secret);
+  };
+
+  processSessionRequest = async (sessionRequestToken: string, validationData: any): Promise<string | null> => {
+    const {
+      generateSecret,
+      generateSessionToken,
+      serverOptions,
+    } = this;
+
+    const {
+      validateRequestHandler,
+      storeSessionKeyHandler,
+    } = serverOptions;
+
+    return (
+      await validateRequestHandler(validationData)
+      && generateSessionToken(await storeSessionKeyHandler(generateSecret()).catch((e) => null))
+    ) || null;
+  };
+
+  checkSessionToken = async (sessionToken: string, extraValidationData?: any): Promise<boolean> => {
+    try {
+      const {
+        validateSessionKeyInStoreHandler,
+      } = this.serverOptions;
+
+      const {data: sessionKey} = jwt.verify(sessionToken, this.secret) as {data: string};
+
+      return validateSessionKeyInStoreHandler(sessionKey, extraValidationData)
+    } catch (e) {
       return false;
     }
   };

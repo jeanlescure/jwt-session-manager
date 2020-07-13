@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+
 import ClientJWTSessionManager from './';
 import {ClientState} from './interfaces';
 

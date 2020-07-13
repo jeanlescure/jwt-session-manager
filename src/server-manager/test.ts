@@ -1,13 +1,36 @@
+import * as jwt from 'jsonwebtoken';
+
 import ServerJWTSessionManager from './';
 
 const customSecret = 'muchLessSecureTestSecret';
 
 const mockStore: {
   [key: string]: any,
-} = {};
+} = {
+  users: [
+    {
+      username: 'korbendallas',
+      password: 'multipass',
+      sessionKey: null,
+    },
+  ],
+};
+
+const mockInvalidSessionToken = jwt.sign({
+  data: 'invalid'
+}, 'secret');
+
+
+const mockValidateRequestHandler = async (validationData: any) => true;
+const mockStoreSessionKeyHandler = async (sessionKey: string) => '';
+const mockValidateSessionKeyInStoreHandler = async (sessionKey: string, extraValidationData: any) => true;
 
 test('can load secret from env vars', async () => {
-  const serverSessionManager = new ServerJWTSessionManager();
+  const serverSessionManager = new ServerJWTSessionManager({
+    validateRequestHandler: mockValidateRequestHandler,
+    storeSessionKeyHandler: mockStoreSessionKeyHandler,
+    validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
+  });
 
   expect(serverSessionManager.secret).toBe('thisIs1TestSecret!whichIncludes$p#c!@|ch@rs');
 });
@@ -15,6 +38,9 @@ test('can load secret from env vars', async () => {
 test('can be instantiated with custom secret', () => {
   const serverSessionManager = new ServerJWTSessionManager({
     secret: customSecret,
+    validateRequestHandler: mockValidateRequestHandler,
+    storeSessionKeyHandler: mockStoreSessionKeyHandler,
+    validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   });
 
   expect(serverSessionManager.secret).toBe(customSecret);
@@ -25,6 +51,9 @@ test('can generate safe unique secrets', () => {
   // 1 in 1,730,418,915,111,425,280,952,848,056,848,216,368,208,136,360,064,800,224,464,872,000
   const serverSessionManager = new ServerJWTSessionManager({
     secret: customSecret,
+    validateRequestHandler: mockValidateRequestHandler,
+    storeSessionKeyHandler: mockStoreSessionKeyHandler,
+    validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   });
   
   const firstSecret = serverSessionManager.generateSecret();
@@ -41,6 +70,9 @@ test('can generate safe unique secrets', () => {
 test('by default will generate safe unique secret if instantiated with invalid secret', () => {
   const serverSessionManager = new ServerJWTSessionManager({
     secret: null,
+    validateRequestHandler: mockValidateRequestHandler,
+    storeSessionKeyHandler: mockStoreSessionKeyHandler,
+    validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   });
 
   expect(serverSessionManager.secret).not.toBeNull();
@@ -51,6 +83,9 @@ test('will throw if instantiated with invalid secret and autoGenerateSecret fals
   expect(() => new ServerJWTSessionManager({
     secret: null,
     autoGenerateSecret: false,
+    validateRequestHandler: mockValidateRequestHandler,
+    storeSessionKeyHandler: mockStoreSessionKeyHandler,
+    validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   })).toThrow('Invalid Secret!');
 });
 
@@ -59,6 +94,9 @@ test('can store secret upon instantiation', async () => {
     storeSecretHandler: async (secret: string) => {
       mockStore.secret = secret;
     },
+    validateRequestHandler: mockValidateRequestHandler,
+    storeSessionKeyHandler: mockStoreSessionKeyHandler,
+    validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   });
 
   serverSessionManager.secretStorePromise.then(() => {
@@ -67,7 +105,11 @@ test('can store secret upon instantiation', async () => {
 });
 
 test('can generate session request token (which expires) and verify it', (done) => {
-  const serverSessionManager = new ServerJWTSessionManager();
+  const serverSessionManager = new ServerJWTSessionManager({
+    validateRequestHandler: mockValidateRequestHandler,
+    storeSessionKeyHandler: mockStoreSessionKeyHandler,
+    validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
+  });
 
   const twoMinToken = serverSessionManager.generateSessionRequestToken();
 
@@ -79,4 +121,69 @@ test('can generate session request token (which expires) and verify it', (done) 
     expect(serverSessionManager.checkSessionRequestToken(oneSecToken)).toBe(false);
     done();
   }, 1100);
+});
+
+test('can process a session request and validate a session', async () => {
+  const serverSessionManager = new ServerJWTSessionManager({
+    validateRequestHandler: async (validationData: any) => {
+      return (
+        mockStore.users[0].username === validationData.username
+        && mockStore.users[0].password === validationData.password
+      );
+    },
+    storeSessionKeyHandler: async (sessionKey: string) => {
+      mockStore.users[0].sessionKey = sessionKey;
+
+      return sessionKey;
+    },
+    validateSessionKeyInStoreHandler: async (sessionKey: string, extraValidationData: any): Promise<boolean> => {
+      return new Promise((resolve, reject) => resolve(
+        sessionKey === mockStore.users[0].sessionKey
+        && extraValidationData.username === mockStore.users[0].username
+      ))
+    },
+  });
+
+  const twoMinToken = serverSessionManager.generateSessionRequestToken();
+
+  const validData = {
+    username: 'korbendallas',
+    password: 'multipass',
+  };
+
+  const sessionToken = await serverSessionManager.processSessionRequest(twoMinToken, validData);
+
+  expect(typeof mockStore.users[0].sessionKey).toBe('string');
+  expect(mockStore.users[0].sessionKey.length).toBe(64);
+
+  const {data} = jwt.verify(sessionToken, serverSessionManager.secret) as {data: any};
+
+  expect(data).toBe(mockStore.users[0].sessionKey);
+
+  const validSession = await serverSessionManager.checkSessionToken(
+    sessionToken,
+    {
+      username: 'korbendallas',
+    },
+  );
+
+  expect(validSession).toBe(true);
+
+  const invalidData = {
+    username: 'korbendallas',
+    password: 'jeanbabtisteemanuelzorg',
+  };
+
+  const failedRequest = await serverSessionManager.processSessionRequest(twoMinToken, invalidData);
+
+  expect(failedRequest).toBeNull();
+
+  const invalidSession = await serverSessionManager.checkSessionToken(
+    mockInvalidSessionToken,
+    {
+      username: 'korbendallas',
+    },
+  );
+
+  expect(invalidSession).toBe(false);
 });
