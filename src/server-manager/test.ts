@@ -65,3 +65,18 @@ test('can store secret upon instantiation', async () => {
     expect(mockStore.secret).toBe('thisIs1TestSecret!whichIncludes$p#c!@|ch@rs');
   }); 
 });
+
+test('can generate session request token (which expires) and verify it', (done) => {
+  const serverSessionManager = new ServerJWTSessionManager();
+
+  const twoMinToken = serverSessionManager.generateSessionRequestToken();
+
+  expect(serverSessionManager.checkSessionRequestToken(twoMinToken)).toBe(true);
+
+  const oneSecToken = serverSessionManager.generateSessionRequestToken(1);
+
+  setTimeout(() => {
+    expect(serverSessionManager.checkSessionRequestToken(oneSecToken)).toBe(false);
+    done();
+  }, 1100);
+});

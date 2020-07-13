@@ -2,6 +2,7 @@ import path from 'path';
 require('dotenv').config({path: process.env.DOTENV_CONFIG_PATH || path.resolve(process.cwd(), '.env')});
 
 import ShortUniqueId from 'short-unique-id';
+import * as jwt from 'jsonwebtoken';
 
 import {ServerOptions} from './interfaces';
 
@@ -54,4 +55,19 @@ export default class ServerJWTSessionManager {
     this.serverOptions.storeSecretHandler
     && (this.secretStorePromise = this.serverOptions.storeSecretHandler(this.secret));
   }
+
+  generateSessionRequestToken = (expirySeconds: number = 60 * 2): string => {
+    return jwt.sign({
+      exp: Math.floor(Date.now() / 1000) + expirySeconds,
+    }, this.secret);
+  };
+
+  checkSessionRequestToken = (sessionRequestToken: string): boolean => {
+    try {
+      jwt.verify(sessionRequestToken, this.secret);
+      return true;
+    } catch(e) {
+      return false;
+    }
+  };
 };
