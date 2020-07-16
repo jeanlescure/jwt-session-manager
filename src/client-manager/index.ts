@@ -31,7 +31,7 @@ export default class ClientJWTSessionManager {
     };
   };
 
-  getSessionRequestToken = async () => {
+  getSessionRequestToken = async (): Promise<void> => {
     const {
       clientOptions,
       setState,
@@ -42,21 +42,23 @@ export default class ClientJWTSessionManager {
       storeSessionRequestTokenHandler,
     } = clientOptions;
 
-    const requestTokenResponse = await getSessionRequestTokenHandler();
+    const requestTokenResponse = await getSessionRequestTokenHandler().catch((e) => {throw e;});
 
     setState({
       sessionRequestToken: requestTokenResponse,
     });
 
     storeSessionRequestTokenHandler
-    && await storeSessionRequestTokenHandler(this.state.sessionRequestToken);
+    && await storeSessionRequestTokenHandler(this.state.sessionRequestToken).catch((e) => {throw e;});
+
+    return;
   };
 
   get sessionToken(): string {
     return this.state.sessionToken;
   };
 
-  getSession = async () => {
+  getSession = async (): Promise<void> => {
     const {
       clientOptions,
       getSessionRequestToken,
@@ -78,20 +80,22 @@ export default class ClientJWTSessionManager {
       }
 
       // If token is expired simply retry once as it may be an invalid stored token
-      await getSessionRequestToken();
+      await getSessionRequestToken().catch((e) => {throw e;});
 
-      return await getSessionHandler(this.state.sessionRequestToken);
-    });
+      return await getSessionHandler(this.state.sessionRequestToken).catch((e) => {throw e;});
+    }).catch((e) => {throw e;});
 
     setState({
       sessionToken
     });
 
     storeSessionTokenHandler
-    && await storeSessionTokenHandler(this.sessionToken);
+    && await storeSessionTokenHandler(this.sessionToken).catch((e) => {throw e;});
+
+    return;
   };
 
-  closeSession = async () => {
+  closeSession = async (): Promise<void> => {
     const {
       clientOptions,
       setState,
@@ -102,10 +106,12 @@ export default class ClientJWTSessionManager {
     } = clientOptions;
 
     closeSessionHandler
-    && await closeSessionHandler(this.sessionToken);
+    && await closeSessionHandler(this.sessionToken).catch((e) => {throw e;});
 
     setState({
       sessionToken: null,
     });
+
+    return;
   };
 };

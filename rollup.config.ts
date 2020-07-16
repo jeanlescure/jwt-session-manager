@@ -41,7 +41,7 @@ export default [
     output: [
       {
         file: `${pkg.main}.browser.js`,
-        format: 'umd',
+        format: 'iife',
         name: 'ClientJWTSessionManager',
         sourcemap: true,
       },
@@ -55,6 +55,7 @@ export default [
       }),
       resolve({
         preferBuiltins: true,
+        browser: true,
       }),
     ],
     // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')

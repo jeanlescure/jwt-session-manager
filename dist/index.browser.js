@@ -1,8 +1,5 @@
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global = global || self, global.ClientJWTSessionManager = factory());
-}(this, (function () { 'use strict';
+var ClientJWTSessionManager = (function () {
+    'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation.
@@ -93,7 +90,7 @@
                         case 0:
                             _a = this, clientOptions = _a.clientOptions, setState = _a.setState;
                             getSessionRequestTokenHandler = clientOptions.getSessionRequestTokenHandler, storeSessionRequestTokenHandler = clientOptions.storeSessionRequestTokenHandler;
-                            return [4 /*yield*/, getSessionRequestTokenHandler()];
+                            return [4 /*yield*/, getSessionRequestTokenHandler().catch(function (e) { throw e; })];
                         case 1:
                             requestTokenResponse = _c.sent();
                             setState({
@@ -101,7 +98,7 @@
                             });
                             _b = storeSessionRequestTokenHandler;
                             if (!_b) return [3 /*break*/, 3];
-                            return [4 /*yield*/, storeSessionRequestTokenHandler(this.state.sessionRequestToken)];
+                            return [4 /*yield*/, storeSessionRequestTokenHandler(this.state.sessionRequestToken).catch(function (e) { throw e; })];
                         case 2:
                             _b = (_c.sent());
                             _c.label = 3;
@@ -131,15 +128,15 @@
                                                 throw error;
                                             }
                                             // If token is expired simply retry once as it may be an invalid stored token
-                                            return [4 /*yield*/, getSessionRequestToken()];
+                                            return [4 /*yield*/, getSessionRequestToken().catch(function (e) { throw e; })];
                                         case 1:
                                             // If token is expired simply retry once as it may be an invalid stored token
                                             _a.sent();
-                                            return [4 /*yield*/, getSessionHandler(this.state.sessionRequestToken)];
+                                            return [4 /*yield*/, getSessionHandler(this.state.sessionRequestToken).catch(function (e) { throw e; })];
                                         case 2: return [2 /*return*/, _a.sent()];
                                     }
                                 });
-                            }); })];
+                            }); }).catch(function (e) { throw e; })];
                         case 3:
                             sessionToken = _c.sent();
                             setState({
@@ -147,7 +144,7 @@
                             });
                             _b = storeSessionTokenHandler;
                             if (!_b) return [3 /*break*/, 5];
-                            return [4 /*yield*/, storeSessionTokenHandler(this.sessionToken)];
+                            return [4 /*yield*/, storeSessionTokenHandler(this.sessionToken).catch(function (e) { throw e; })];
                         case 4:
                             _b = (_c.sent());
                             _c.label = 5;
@@ -165,7 +162,7 @@
                             closeSessionHandler = clientOptions.closeSessionHandler;
                             _b = closeSessionHandler;
                             if (!_b) return [3 /*break*/, 2];
-                            return [4 /*yield*/, closeSessionHandler(this.sessionToken)];
+                            return [4 /*yield*/, closeSessionHandler(this.sessionToken).catch(function (e) { throw e; })];
                         case 1:
                             _b = (_c.sent());
                             _c.label = 2;
@@ -193,5 +190,5 @@
 
     return ClientJWTSessionManager;
 
-})));
+}());
 //# sourceMappingURL=index.browser.js.map

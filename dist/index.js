@@ -128,22 +128,27 @@ var ServerJWTSessionManager = /** @class */ (function () {
             }, _this.secret);
         };
         this.processSessionRequest = function (sessionRequestToken, validationData) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, generateSecret, generateSessionToken, serverOptions, validateRequestHandler, storeSessionKeyHandler, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            var _a, checkSessionRequestToken, generateSecret, generateSessionToken, serverOptions, validateRequestHandler, storeSessionKeyHandler, _b, _c, _d;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
                     case 0:
-                        _a = this, generateSecret = _a.generateSecret, generateSessionToken = _a.generateSessionToken, serverOptions = _a.serverOptions;
+                        _a = this, checkSessionRequestToken = _a.checkSessionRequestToken, generateSecret = _a.generateSecret, generateSessionToken = _a.generateSessionToken, serverOptions = _a.serverOptions;
                         validateRequestHandler = serverOptions.validateRequestHandler, storeSessionKeyHandler = serverOptions.storeSessionKeyHandler;
+                        _c = checkSessionRequestToken(sessionRequestToken);
+                        if (!_c) return [3 /*break*/, 2];
                         return [4 /*yield*/, validateRequestHandler(validationData)];
                     case 1:
-                        _b = (_d.sent());
-                        if (!_b) return [3 /*break*/, 3];
-                        _c = generateSessionToken;
-                        return [4 /*yield*/, storeSessionKeyHandler(generateSecret()).catch(function (e) { return null; })];
+                        _c = (_e.sent());
+                        _e.label = 2;
                     case 2:
-                        _b = _c.apply(void 0, [_d.sent()]);
-                        _d.label = 3;
-                    case 3: return [2 /*return*/, (_b) || null];
+                        _b = _c;
+                        if (!_b) return [3 /*break*/, 4];
+                        _d = generateSessionToken;
+                        return [4 /*yield*/, storeSessionKeyHandler(generateSecret(), validationData).catch(function (e) { return null; })];
+                    case 3:
+                        _b = _d.apply(void 0, [_e.sent()]);
+                        _e.label = 4;
+                    case 4: return [2 /*return*/, (_b) || null];
                 }
             });
         }); };
@@ -207,7 +212,7 @@ var ClientJWTSessionManager = /** @class */ (function () {
                     case 0:
                         _a = this, clientOptions = _a.clientOptions, setState = _a.setState;
                         getSessionRequestTokenHandler = clientOptions.getSessionRequestTokenHandler, storeSessionRequestTokenHandler = clientOptions.storeSessionRequestTokenHandler;
-                        return [4 /*yield*/, getSessionRequestTokenHandler()];
+                        return [4 /*yield*/, getSessionRequestTokenHandler().catch(function (e) { throw e; })];
                     case 1:
                         requestTokenResponse = _c.sent();
                         setState({
@@ -215,7 +220,7 @@ var ClientJWTSessionManager = /** @class */ (function () {
                         });
                         _b = storeSessionRequestTokenHandler;
                         if (!_b) return [3 /*break*/, 3];
-                        return [4 /*yield*/, storeSessionRequestTokenHandler(this.state.sessionRequestToken)];
+                        return [4 /*yield*/, storeSessionRequestTokenHandler(this.state.sessionRequestToken).catch(function (e) { throw e; })];
                     case 2:
                         _b = (_c.sent());
                         _c.label = 3;
@@ -245,15 +250,15 @@ var ClientJWTSessionManager = /** @class */ (function () {
                                             throw error;
                                         }
                                         // If token is expired simply retry once as it may be an invalid stored token
-                                        return [4 /*yield*/, getSessionRequestToken()];
+                                        return [4 /*yield*/, getSessionRequestToken().catch(function (e) { throw e; })];
                                     case 1:
                                         // If token is expired simply retry once as it may be an invalid stored token
                                         _a.sent();
-                                        return [4 /*yield*/, getSessionHandler(this.state.sessionRequestToken)];
+                                        return [4 /*yield*/, getSessionHandler(this.state.sessionRequestToken).catch(function (e) { throw e; })];
                                     case 2: return [2 /*return*/, _a.sent()];
                                 }
                             });
-                        }); })];
+                        }); }).catch(function (e) { throw e; })];
                     case 3:
                         sessionToken = _c.sent();
                         setState({
@@ -261,7 +266,7 @@ var ClientJWTSessionManager = /** @class */ (function () {
                         });
                         _b = storeSessionTokenHandler;
                         if (!_b) return [3 /*break*/, 5];
-                        return [4 /*yield*/, storeSessionTokenHandler(this.sessionToken)];
+                        return [4 /*yield*/, storeSessionTokenHandler(this.sessionToken).catch(function (e) { throw e; })];
                     case 4:
                         _b = (_c.sent());
                         _c.label = 5;
@@ -279,7 +284,7 @@ var ClientJWTSessionManager = /** @class */ (function () {
                         closeSessionHandler = clientOptions.closeSessionHandler;
                         _b = closeSessionHandler;
                         if (!_b) return [3 /*break*/, 2];
-                        return [4 /*yield*/, closeSessionHandler(this.sessionToken)];
+                        return [4 /*yield*/, closeSessionHandler(this.sessionToken).catch(function (e) { throw e; })];
                     case 1:
                         _b = (_c.sent());
                         _c.label = 2;

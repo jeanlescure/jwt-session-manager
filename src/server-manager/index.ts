@@ -84,6 +84,7 @@ export default class ServerJWTSessionManager {
 
   processSessionRequest = async (sessionRequestToken: string, validationData: any): Promise<string | null> => {
     const {
+      checkSessionRequestToken,
       generateSecret,
       generateSessionToken,
       serverOptions,
@@ -95,8 +96,9 @@ export default class ServerJWTSessionManager {
     } = serverOptions;
 
     return (
-      await validateRequestHandler(validationData)
-      && generateSessionToken(await storeSessionKeyHandler(generateSecret()).catch((e) => null))
+      checkSessionRequestToken(sessionRequestToken)
+      && await validateRequestHandler(validationData)
+      && generateSessionToken(await storeSessionKeyHandler(generateSecret(), validationData).catch((e) => null))
     ) || null;
   };
 
