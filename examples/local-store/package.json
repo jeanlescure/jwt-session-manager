@@ -1,0 +1,18 @@
+{
+  "name": "local-store-example",
+  "version": "1.0.0",
+  "description": "Example of jwt-session-manager usage with LevelDB",
+  "main": "index.js",
+  "author": "Jean M. Lescure",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@adorsys/encrypt-down": "^2.1.0",
+    "bcrypt": "^5.0.0",
+    "express": "^4.17.1",
+    "leveldown": "^5.6.0",
+    "levelup": "^4.4.0"
+  }
+}
