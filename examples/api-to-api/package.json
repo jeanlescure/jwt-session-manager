@@ -1,0 +1,11 @@
+{
+  "name": "api-to-api",
+  "version": "1.0.0",
+  "description": "Example of jwt-session-manager usage in api to api context",
+  "author": "Jean M. Lescure",
+  "license": "Apache-2.0",
+  "scripts": {
+    "server": "node server.js",
+    "requester": "node requester.js"
+  }
+}
