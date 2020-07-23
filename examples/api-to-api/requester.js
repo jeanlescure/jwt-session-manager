@@ -62,7 +62,7 @@ const routes = {
     await sessionManager.getSession();
 
     const sensitiveData = await new Promise((resolve, reject) => {
-      const req = http.get(
+      http.get(
         'http://localhost:8081/sensitive-data',
         {
           headers: {
@@ -70,7 +70,7 @@ const routes = {
             'Key': fs.readFileSync('.key').toString(),
           },
         },
-        (response) => handleResponse(response, resolve, reject),
+        (res) => handleResponse(res, resolve, reject),
       ).end();
     });
 
