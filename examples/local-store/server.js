@@ -74,7 +74,7 @@ const main = async () => {
       if (request.method === 'POST') {
         let body = '';
 
-        request.on('data', chunk => {
+        request.on('data', (chunk) => {
           body += chunk.toString();
         });
 
