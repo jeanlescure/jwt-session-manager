@@ -11,11 +11,11 @@ const sessionExpired = (keyObj) => {
   return (iat + 30) - Math.floor(Date.now() / 1000) < 0;
 };
 
-const storeSecretHandler = async (secret) => {
+const storeJWTSecretHandler = async (jwtSecret) => {
   try {
     fs.statSync('.secret');
   } catch(e) {
-    fs.writeFileSync('.secret', secret);
+    fs.writeFileSync('.secret', jwtSecret);
   }
 };
 
@@ -47,16 +47,16 @@ const validateSessionKeyInStoreHandler = async (sessionKey) => {
 
 const main = async () => {
   const sessionManager = new ServerJWTSessionManager({
-    secret: await new Promise((resolve) => resolve(fs.readFileSync('.secret'))).catch(() => null),
-    storeSecretHandler,
+    jwtSecret: await new Promise((resolve) => resolve(fs.readFileSync('.jwtSecret'))).catch(() => null),
+    storeJWTSecretHandler,
     validateRequestHandler,
     storeSessionKeyHandler,
     validateSessionKeyInStoreHandler,
   });
 
-  // await sessionManager.secretStorePromise.then(() => console.log(sessionManager.secret));
+  // await sessionManager.jwtSecretStorePromise.then(() => console.log(sessionManager.jwtSecret));
 
-  const PORT = 8080;
+  const PORT = 8081;
 
   const handleNotFound = (request, response) => {
     response.writeHead(404, {'Content-Type': 'text/plain'});

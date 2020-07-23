@@ -6,6 +6,10 @@
   "license": "Apache-2.0",
   "scripts": {
     "server": "node server.js",
-    "requester": "node requester.js"
+    "requester": "node requester.js",
+    "start": "concurrently 'yarn server' 'yarn requester'"
+  },
+  "dependencies": {
+    "concurrently": "^5.2.0"
   }
 }

@@ -16,11 +16,11 @@ const jwk = {
 const localdb = leveldown('./store');
 const db = levelup(encryptdown(localdb, { jwk }));
 
-const storeSecretHandler = async (secret) => {
+const storeJWTSecretHandler = async (jwtSecret) => {
   const storedSecret = await db.get('sessionSecret', {asBuffer: false}).catch((e) => null);
 
   !storedSecret
-  && await db.put('sessionSecret', secret);
+  && await db.put('sessionSecret', jwtSecret);
 };
 
 const validateRequestHandler = async ({username, password}) => {
@@ -45,14 +45,14 @@ const validateSessionKeyInStoreHandler = async (sessionKey, {username}) => {
 
 const main = async () => {
   const sessionManager = new ServerJWTSessionManager({
-    secret: await db.get('sessionSecret', {asBuffer: false}).catch((e) => null),
-    storeSecretHandler,
+    jwtSecret: await db.get('sessionSecret', {asBuffer: false}).catch((e) => null),
+    storeJWTSecretHandler,
     validateRequestHandler,
     storeSessionKeyHandler,
     validateSessionKeyInStoreHandler,
   });
 
-  // await sessionManager.secretStorePromise.then(() => console.log(sessionManager.secret));
+  await sessionManager.jwtSecretStorePromise.then(() => console.log(sessionManager.jwtSecret));
 
   const PORT = 8080;
 

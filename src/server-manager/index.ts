@@ -21,10 +21,10 @@ export default class ServerJWTSessionManager {
     validateSessionKeyInStoreHandler: async () => false,
   };
 
-  secretStorePromise: Promise<void>;
+  jwtSecretStorePromise: Promise<ServerJWTSessionManager>;
 
-  get secret(): string {
-    return this.serverOptions.secret;
+  get jwtSecret(): string {
+    return this.serverOptions.jwtSecret;
   }
 
   generateSecret = (): string => {
@@ -41,7 +41,7 @@ export default class ServerJWTSessionManager {
   constructor(options: ServerOptions) {
     const envOptions: ServerOptions = {
       ...this.serverOptions,
-      secret: process.env.SESSION_MANAGER_SECRET,
+      jwtSecret: process.env.SESSION_MANAGER_SECRET,
     };
 
     this.serverOptions = {
@@ -49,25 +49,31 @@ export default class ServerJWTSessionManager {
       ...options,
     };
 
-    if (!this.serverOptions.secret && this.serverOptions.autoGenerateSecret) {
-      this.serverOptions.secret = this.generateSecret();
+    if (!this.serverOptions.jwtSecret && this.serverOptions.autoGenerateSecret) {
+      this.serverOptions.jwtSecret = this.generateSecret();
     } else if (!this.serverOptions.autoGenerateSecret) {
       throw new Error('Invalid Secret!');
     }
 
-    this.serverOptions.storeSecretHandler
-    && (this.secretStorePromise = this.serverOptions.storeSecretHandler(this.secret));
+    this.serverOptions.storeJWTSecretHandler
+    && (
+      this.jwtSecretStorePromise = (async (): Promise<ServerJWTSessionManager>  => {
+        await this.serverOptions.storeJWTSecretHandler(this.jwtSecret);
+
+        return this;
+      })()
+    );
   }
 
   generateSessionRequestToken = (expirySeconds: number = 60 * 2): string => {
     return jwt.sign({
       exp: Math.floor(Date.now() / 1000) + expirySeconds,
-    }, this.secret);
+    }, this.jwtSecret);
   };
 
   checkSessionRequestToken = (sessionRequestToken: string): boolean => {
     try {
-      jwt.verify(sessionRequestToken, this.secret);
+      jwt.verify(sessionRequestToken, this.jwtSecret);
       return true;
     } catch(e) {
       return false;
@@ -79,7 +85,7 @@ export default class ServerJWTSessionManager {
       !sessionKey && null
     ) || jwt.sign({
       data: sessionKey,
-    }, this.secret);
+    }, this.jwtSecret);
   };
 
   processSessionRequest = async (sessionRequestToken: string, validationData: any): Promise<string | null> => {
@@ -108,7 +114,7 @@ export default class ServerJWTSessionManager {
         validateSessionKeyInStoreHandler,
       } = this.serverOptions;
 
-      const {data: sessionKey} = jwt.verify(sessionToken, this.secret) as {data: string};
+      const {data: sessionKey} = jwt.verify(sessionToken, this.jwtSecret) as {data: string};
 
       return validateSessionKeyInStoreHandler(sessionKey, extraValidationData)
     } catch (e) {

@@ -32,25 +32,25 @@ test('can load secret from env vars', async () => {
     validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   });
 
-  expect(serverSessionManager.secret).toBe('thisIs1TestSecret!whichIncludes$p#c!@|ch@rs');
+  expect(serverSessionManager.jwtSecret).toBe('thisIs1TestSecret!whichIncludes$p#c!@|ch@rs');
 });
 
 test('can be instantiated with custom secret', () => {
   const serverSessionManager = new ServerJWTSessionManager({
-    secret: customSecret,
+    jwtSecret: customSecret,
     validateRequestHandler: mockValidateRequestHandler,
     storeSessionKeyHandler: mockStoreSessionKeyHandler,
     validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   });
 
-  expect(serverSessionManager.secret).toBe(customSecret);
+  expect(serverSessionManager.jwtSecret).toBe(customSecret);
 });
 
 test('can generate safe unique secrets', () => {
   // This test has an approximate probability of failing of
   // 1 in 1,730,418,915,111,425,280,952,848,056,848,216,368,208,136,360,064,800,224,464,872,000
   const serverSessionManager = new ServerJWTSessionManager({
-    secret: customSecret,
+    jwtSecret: customSecret,
     validateRequestHandler: mockValidateRequestHandler,
     storeSessionKeyHandler: mockStoreSessionKeyHandler,
     validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
@@ -69,19 +69,19 @@ test('can generate safe unique secrets', () => {
 
 test('by default will generate safe unique secret if instantiated with invalid secret', () => {
   const serverSessionManager = new ServerJWTSessionManager({
-    secret: null,
+    jwtSecret: null,
     validateRequestHandler: mockValidateRequestHandler,
     storeSessionKeyHandler: mockStoreSessionKeyHandler,
     validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   });
 
-  expect(serverSessionManager.secret).not.toBeNull();
-  expect(serverSessionManager.secret.length).toBe(64);
+  expect(serverSessionManager.jwtSecret).not.toBeNull();
+  expect(serverSessionManager.jwtSecret.length).toBe(64);
 });
 
 test('will throw if instantiated with invalid secret and autoGenerateSecret false', () => {
   expect(() => new ServerJWTSessionManager({
-    secret: null,
+    jwtSecret: null,
     autoGenerateSecret: false,
     validateRequestHandler: mockValidateRequestHandler,
     storeSessionKeyHandler: mockStoreSessionKeyHandler,
@@ -91,16 +91,16 @@ test('will throw if instantiated with invalid secret and autoGenerateSecret fals
 
 test('can store secret upon instantiation', async () => {
   const serverSessionManager = new ServerJWTSessionManager({
-    storeSecretHandler: async (secret: string) => {
-      mockStore.secret = secret;
+    storeJWTSecretHandler: async (jwtSecret: string) => {
+      mockStore.jwtSecret = jwtSecret;
     },
     validateRequestHandler: mockValidateRequestHandler,
     storeSessionKeyHandler: mockStoreSessionKeyHandler,
     validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
   });
 
-  serverSessionManager.secretStorePromise.then(() => {
-    expect(mockStore.secret).toBe('thisIs1TestSecret!whichIncludes$p#c!@|ch@rs');
+  serverSessionManager.jwtSecretStorePromise.then(() => {
+    expect(mockStore.jwtSecret).toBe('thisIs1TestSecret!whichIncludes$p#c!@|ch@rs');
   }); 
 });
 
@@ -156,7 +156,7 @@ test('can process a session request and validate a session', async () => {
   expect(typeof mockStore.users[0].sessionKey).toBe('string');
   expect(mockStore.users[0].sessionKey.length).toBe(64);
 
-  const {data} = jwt.verify(sessionToken, serverSessionManager.secret) as {data: any};
+  const {data} = jwt.verify(sessionToken, serverSessionManager.jwtSecret) as {data: any};
 
   expect(data).toBe(mockStore.users[0].sessionKey);
 

@@ -1,8 +1,8 @@
 import { ServerOptions } from './interfaces';
 export default class ServerJWTSessionManager {
     serverOptions: ServerOptions;
-    secretStorePromise: Promise<void>;
-    get secret(): string;
+    jwtSecretStorePromise: Promise<ServerJWTSessionManager>;
+    get jwtSecret(): string;
     generateSecret: () => string;
     constructor(options: ServerOptions);
     generateSessionRequestToken: (expirySeconds?: number) => string;

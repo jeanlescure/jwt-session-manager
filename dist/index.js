@@ -8,7 +8,7 @@ var path = _interopDefault(require('path'));
 var ShortUniqueId = _interopDefault(require('short-unique-id'));
 var jwt = require('jsonwebtoken');
 
-var version = '1.0.0';
+var version = '1.0.2';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -111,11 +111,11 @@ var ServerJWTSessionManager = /** @class */ (function () {
             if (expirySeconds === void 0) { expirySeconds = 60 * 2; }
             return jwt.sign({
                 exp: Math.floor(Date.now() / 1000) + expirySeconds,
-            }, _this.secret);
+            }, _this.jwtSecret);
         };
         this.checkSessionRequestToken = function (sessionRequestToken) {
             try {
-                jwt.verify(sessionRequestToken, _this.secret);
+                jwt.verify(sessionRequestToken, _this.jwtSecret);
                 return true;
             }
             catch (e) {
@@ -125,7 +125,7 @@ var ServerJWTSessionManager = /** @class */ (function () {
         this.generateSessionToken = function (sessionKey) {
             return (!sessionKey && null) || jwt.sign({
                 data: sessionKey,
-            }, _this.secret);
+            }, _this.jwtSecret);
         };
         this.processSessionRequest = function (sessionRequestToken, validationData) { return __awaiter(_this, void 0, void 0, function () {
             var _a, checkSessionRequestToken, generateSecret, generateSessionToken, serverOptions, validateRequestHandler, storeSessionKeyHandler, _b, _c, _d;
@@ -157,7 +157,7 @@ var ServerJWTSessionManager = /** @class */ (function () {
             return __generator(this, function (_a) {
                 try {
                     validateSessionKeyInStoreHandler = this.serverOptions.validateSessionKeyInStoreHandler;
-                    sessionKey = jwt.verify(sessionToken, this.secret).data;
+                    sessionKey = jwt.verify(sessionToken, this.jwtSecret).data;
                     return [2 /*return*/, validateSessionKeyInStoreHandler(sessionKey, extraValidationData)];
                 }
                 catch (e) {
@@ -166,20 +166,29 @@ var ServerJWTSessionManager = /** @class */ (function () {
                 return [2 /*return*/];
             });
         }); };
-        var envOptions = __assign(__assign({}, this.serverOptions), { secret: process.env.SESSION_MANAGER_SECRET });
+        var envOptions = __assign(__assign({}, this.serverOptions), { jwtSecret: process.env.SESSION_MANAGER_SECRET });
         this.serverOptions = __assign(__assign({}, envOptions), options);
-        if (!this.serverOptions.secret && this.serverOptions.autoGenerateSecret) {
-            this.serverOptions.secret = this.generateSecret();
+        if (!this.serverOptions.jwtSecret && this.serverOptions.autoGenerateSecret) {
+            this.serverOptions.jwtSecret = this.generateSecret();
         }
         else if (!this.serverOptions.autoGenerateSecret) {
             throw new Error('Invalid Secret!');
         }
-        this.serverOptions.storeSecretHandler
-            && (this.secretStorePromise = this.serverOptions.storeSecretHandler(this.secret));
+        this.serverOptions.storeJWTSecretHandler
+            && (this.jwtSecretStorePromise = (function () { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.serverOptions.storeJWTSecretHandler(this.jwtSecret)];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/, this];
+                    }
+                });
+            }); })());
     }
-    Object.defineProperty(ServerJWTSessionManager.prototype, "secret", {
+    Object.defineProperty(ServerJWTSessionManager.prototype, "jwtSecret", {
         get: function () {
-            return this.serverOptions.secret;
+            return this.serverOptions.jwtSecret;
         },
         enumerable: false,
         configurable: true
