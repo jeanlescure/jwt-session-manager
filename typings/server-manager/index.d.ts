@@ -7,7 +7,8 @@ export default class ServerJWTSessionManager {
     constructor(options: ServerOptions);
     generateSessionRequestToken: (expirySeconds?: number) => string;
     checkSessionRequestToken: (sessionRequestToken: string) => boolean;
-    generateSessionToken: (sessionKey: string | null) => string;
-    processSessionRequest: (sessionRequestToken: string, validationData: any) => Promise<string | null>;
+    generateSessionToken: (sessionKey: string | null, sessionData?: any) => string;
+    processSessionRequest: (sessionRequestToken: string, validationData: any, sessionData?: any) => Promise<string | null>;
     checkSessionToken: (sessionToken: string, extraValidationData?: any) => Promise<boolean>;
+    dataFromSessionToken: (sessionToken: string, extraValidationData?: any) => Promise<any>;
 }

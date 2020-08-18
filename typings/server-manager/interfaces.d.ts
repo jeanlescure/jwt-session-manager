@@ -6,3 +6,7 @@ export interface ServerOptions {
     autoGenerateSecret?: boolean;
     storeJWTSecretHandler?: (jwtSecret: string) => Promise<void>;
 }
+export interface SessionObject {
+    sessionKey: string;
+    sessionData?: any;
+}
