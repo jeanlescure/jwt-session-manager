@@ -17,7 +17,7 @@ const mockStore: {
 };
 
 const mockInvalidSessionToken = jwt.sign({
-  data: 'invalid'
+  sessionKey: 'invalid'
 }, 'secret');
 
 
@@ -156,9 +156,9 @@ test('can process a session request and validate a session', async () => {
   expect(typeof mockStore.users[0].sessionKey).toBe('string');
   expect(mockStore.users[0].sessionKey.length).toBe(64);
 
-  const {data} = jwt.verify(sessionToken, serverSessionManager.jwtSecret) as {data: any};
+  const {sessionKey} = jwt.verify(sessionToken, serverSessionManager.jwtSecret) as {sessionKey: any};
 
-  expect(data).toBe(mockStore.users[0].sessionKey);
+  expect(sessionKey).toBe(mockStore.users[0].sessionKey);
 
   const validSession = await serverSessionManager.checkSessionToken(
     sessionToken,
@@ -168,6 +168,10 @@ test('can process a session request and validate a session', async () => {
   );
 
   expect(validSession).toBe(true);
+
+  const sessionData = await serverSessionManager.dataFromSessionToken(sessionToken);
+
+  expect(sessionData).toBeNull();
 
   const invalidData = {
     username: 'korbendallas',
@@ -186,4 +190,28 @@ test('can process a session request and validate a session', async () => {
   );
 
   expect(invalidSession).toBe(false);
+});
+
+test('can append custom data when processing session', async () => {
+  const serverSessionManager = new ServerJWTSessionManager({
+    validateRequestHandler: mockValidateRequestHandler,
+    storeSessionKeyHandler: mockStoreSessionKeyHandler,
+    validateSessionKeyInStoreHandler: mockValidateSessionKeyInStoreHandler,
+  });
+
+  const twoMinToken = serverSessionManager.generateSessionRequestToken();
+
+  const sessionToken = await serverSessionManager.processSessionRequest(
+    twoMinToken,
+    {},
+    {hello: 'world'},
+  );
+
+  const validSession = await serverSessionManager.checkSessionToken(sessionToken);
+
+  expect(validSession).toBe(true);
+
+  const sessionData = await serverSessionManager.dataFromSessionToken(sessionToken);
+
+  expect(sessionData.hello).toBe('world');
 });

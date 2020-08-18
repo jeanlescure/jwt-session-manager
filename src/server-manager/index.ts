@@ -4,7 +4,10 @@ require('dotenv').config({path: process.env.DOTENV_CONFIG_PATH || path.resolve(p
 import ShortUniqueId from 'short-unique-id';
 import * as jwt from 'jsonwebtoken';
 
-import {ServerOptions} from './interfaces';
+import {
+  ServerOptions,
+  SessionObject,
+} from './interfaces';
 
 let idDict = new Array(94);
 for (let i = 93; i >= 0; i -= 1) idDict[i] = String.fromCharCode(i + 33);
@@ -80,15 +83,20 @@ export default class ServerJWTSessionManager {
     }
   };
 
-  generateSessionToken = (sessionKey: string | null) => {
+  generateSessionToken = (sessionKey: string | null, sessionData?: any) => {
     return (
       !sessionKey && null
     ) || jwt.sign({
-      data: sessionKey,
+      sessionKey,
+      sessionData,
     }, this.jwtSecret);
   };
 
-  processSessionRequest = async (sessionRequestToken: string, validationData: any): Promise<string | null> => {
+  processSessionRequest = async (
+    sessionRequestToken: string,
+    validationData: any,
+    sessionData?: any,
+  ): Promise<string | null> => {
     const {
       checkSessionRequestToken,
       generateSecret,
@@ -104,7 +112,10 @@ export default class ServerJWTSessionManager {
     return (
       checkSessionRequestToken(sessionRequestToken)
       && await validateRequestHandler(validationData)
-      && generateSessionToken(await storeSessionKeyHandler(generateSecret(), validationData).catch((e) => null))
+      && generateSessionToken(
+        await storeSessionKeyHandler(generateSecret(), validationData).catch((e) => null),
+        sessionData,
+      )
     ) || null;
   };
 
@@ -114,11 +125,21 @@ export default class ServerJWTSessionManager {
         validateSessionKeyInStoreHandler,
       } = this.serverOptions;
 
-      const {data: sessionKey} = jwt.verify(sessionToken, this.jwtSecret) as {data: string};
+      const {sessionKey} = jwt.verify(sessionToken, this.jwtSecret) as SessionObject;
 
-      return validateSessionKeyInStoreHandler(sessionKey, extraValidationData)
+      return await validateSessionKeyInStoreHandler(sessionKey, extraValidationData)
     } catch (e) {
       return false;
     }
+  };
+
+  dataFromSessionToken = async (sessionToken: string, extraValidationData?: any): Promise<any> => {
+    if (this.checkSessionToken(sessionToken, extraValidationData)) {
+      const {sessionData} = jwt.verify(sessionToken, this.jwtSecret) as SessionObject;
+
+      return sessionData || null;
+    }
+
+    return null;
   };
 };
