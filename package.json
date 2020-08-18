@@ -36,7 +36,7 @@
   },
   "standard-version": {
     "scripts": {
-      "precommit": "yarn build"
+      "precommit": "yarn build && git add dist src/version.ts"
     }
   },
   "husky": {
