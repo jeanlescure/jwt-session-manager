@@ -8,7 +8,7 @@ var path = _interopDefault(require('path'));
 var ShortUniqueId = _interopDefault(require('short-unique-id'));
 var jwt = require('jsonwebtoken');
 
-var version = '1.0.2';
+var version = '1.1.1';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -122,12 +122,13 @@ var ServerJWTSessionManager = /** @class */ (function () {
                 return false;
             }
         };
-        this.generateSessionToken = function (sessionKey) {
+        this.generateSessionToken = function (sessionKey, sessionData) {
             return (!sessionKey && null) || jwt.sign({
-                data: sessionKey,
+                sessionKey: sessionKey,
+                sessionData: sessionData,
             }, _this.jwtSecret);
         };
-        this.processSessionRequest = function (sessionRequestToken, validationData) { return __awaiter(_this, void 0, void 0, function () {
+        this.processSessionRequest = function (sessionRequestToken, validationData, sessionData) { return __awaiter(_this, void 0, void 0, function () {
             var _a, checkSessionRequestToken, generateSecret, generateSessionToken, serverOptions, validateRequestHandler, storeSessionKeyHandler, _b, _c, _d;
             return __generator(this, function (_e) {
                 switch (_e.label) {
@@ -146,24 +147,37 @@ var ServerJWTSessionManager = /** @class */ (function () {
                         _d = generateSessionToken;
                         return [4 /*yield*/, storeSessionKeyHandler(generateSecret(), validationData).catch(function (e) { return null; })];
                     case 3:
-                        _b = _d.apply(void 0, [_e.sent()]);
+                        _b = _d.apply(void 0, [_e.sent(), sessionData]);
                         _e.label = 4;
                     case 4: return [2 /*return*/, (_b) || null];
                 }
             });
         }); };
         this.checkSessionToken = function (sessionToken, extraValidationData) { return __awaiter(_this, void 0, void 0, function () {
-            var validateSessionKeyInStoreHandler, sessionKey;
+            var validateSessionKeyInStoreHandler, sessionKey, e_1;
             return __generator(this, function (_a) {
-                try {
-                    validateSessionKeyInStoreHandler = this.serverOptions.validateSessionKeyInStoreHandler;
-                    sessionKey = jwt.verify(sessionToken, this.jwtSecret).data;
-                    return [2 /*return*/, validateSessionKeyInStoreHandler(sessionKey, extraValidationData)];
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        validateSessionKeyInStoreHandler = this.serverOptions.validateSessionKeyInStoreHandler;
+                        sessionKey = jwt.verify(sessionToken, this.jwtSecret).sessionKey;
+                        return [4 /*yield*/, validateSessionKeyInStoreHandler(sessionKey, extraValidationData)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2:
+                        e_1 = _a.sent();
+                        return [2 /*return*/, false];
+                    case 3: return [2 /*return*/];
                 }
-                catch (e) {
-                    return [2 /*return*/, false];
+            });
+        }); };
+        this.dataFromSessionToken = function (sessionToken, extraValidationData) { return __awaiter(_this, void 0, void 0, function () {
+            var sessionData;
+            return __generator(this, function (_a) {
+                if (this.checkSessionToken(sessionToken, extraValidationData)) {
+                    sessionData = jwt.verify(sessionToken, this.jwtSecret).sessionData;
+                    return [2 /*return*/, sessionData || null];
                 }
-                return [2 /*return*/];
+                return [2 /*return*/, null];
             });
         }); };
         var envOptions = __assign(__assign({}, this.serverOptions), { jwtSecret: process.env.SESSION_MANAGER_SECRET });
