@@ -36,7 +36,7 @@
   },
   "standard-version": {
     "scripts": {
-      "precommit": "yarn build && git add dist typings src/version.ts && git commit -m \"chore: get release ready\""
+      "precommit": "yarn build && git add dist typings src/version.ts && HUSKY_SKIP_HOOKS=1 git commit -m \"chore: get release ready\""
     }
   },
   "husky": {
