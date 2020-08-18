@@ -1,6 +1,6 @@
 {
   "name": "jwt-session-manager",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "author": "Jean M. Lescure",
   "description": "Server and client functions for handling sessions using JWT",
   "keywords": [
@@ -25,7 +25,7 @@
     "url": ""
   },
   "scripts": {
-    "release": "standard-version --dry-run",
+    "release": "standard-version --no-verify",
     "gen:version": "echo \"export default '`jq -r .version package.json`';\" > ./src/version.ts",
     "gen:typings": "tsc --target es5 --allowSyntheticDefaultImports --declarationDir typings --declaration --emitDeclarationOnly ./src/index.ts",
     "pretest": "yarn gen:version",
@@ -36,7 +36,7 @@
   },
   "standard-version": {
     "scripts": {
-      "precommit": "yarn gen:version"
+      "precommit": "yarn build"
     }
   },
   "husky": {
