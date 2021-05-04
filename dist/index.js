@@ -8,7 +8,7 @@ var path = _interopDefault(require('path'));
 var ShortUniqueId = _interopDefault(require('short-unique-id'));
 var jwt = require('jsonwebtoken');
 
-var version = '1.1.2';
+var version = '1.1.3';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
